@@ -361,6 +361,12 @@ defmodule Phoenix.Channels.GenSocketClient do
   defp maybe_connect(:connect, state), do: connect(state)
   defp maybe_connect(:noconnect, state), do: state
 
+  defp connect(%{transport_pid: pid} = state) when not is_nil(pid) do
+    Process.exit(pid, :kill)
+    state = Map.put(state, :transport_pid, nil)
+    connect(state)
+  end
+
   defp connect(%{transport_pid: nil} = state) do
     if params_in_url?(state.url) do
       raise(
